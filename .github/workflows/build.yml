@@ -7,7 +7,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
+
     steps:
       - uses: actions/checkout@v4
 
@@ -41,7 +42,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Setup Forge Workspace
-        run: ./gradlew setupDecompWorkspace --no-daemon
+        run: ./gradlew setupDecompWorkspace --no-daemon --stacktrace
         timeout-minutes: 40
 
       - name: Build JAR
