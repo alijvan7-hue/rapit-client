@@ -1,0 +1,56 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+version = "1.0.0"
+group = "com.rapit.client"
+archivesBaseName = "RapitClient"
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+minecraft {
+    version = "1.8.9-11.15.1.2318"
+    runDir = "run"
+    mappings = "stable_22"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // No external dependencies needed - pure Forge mod
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+            'FMLCorePlugin': 'com.rapit.client.core.RapitCoreMod',
+            'FMLCorePluginContainsFMLMod': 'true',
+            'ForceLoadAsMod': 'true'
+        )
+    }
+}

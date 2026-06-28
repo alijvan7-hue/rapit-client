@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "rapitclient",
+    "name": "Rapit Client",
+    "description": "A professional Minecraft 1.8.9 client with advanced features.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": ["RapitDev"],
+    "credits": "Rapit Client Team",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
