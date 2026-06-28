@@ -31,6 +31,12 @@ jobs:
           path: ~/.gradle/caches/minecraft
           key: ${{ runner.os }}-minecraft-forge-1.8.9
 
+      - name: Download Gradle Wrapper JAR
+        run: |
+          mkdir -p gradle/wrapper
+          curl -L -o gradle/wrapper/gradle-wrapper.jar \
+            "https://github.com/gradle/gradle/raw/v2.14.0/gradle/wrapper/gradle-wrapper.jar"
+
       - name: Make gradlew executable
         run: chmod +x gradlew
 
