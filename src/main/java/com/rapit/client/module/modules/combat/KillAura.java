@@ -11,21 +11,18 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-/**
- * KillAura – automatically attacks nearby entities.
- */
 public class KillAura extends Module {
 
-    private final SliderSetting range     = addSetting(new SliderSetting("Range","Attack range",3.5,1.0,6.0,0.1));
-    private final SliderSetting cps       = addSetting(new SliderSetting("CPS","Clicks per second",10,1,20,1));
-    private final ModeSetting   target    = addSetting(new ModeSetting("Target","Who to attack","Players","Players","Mobs","All"));
-    private final BoolSetting   rotate    = addSetting(new BoolSetting("Rotate","Rotate to target",true,""));
-    private final BoolSetting   throughWalls = addSetting(new BoolSetting("Through Walls","Attack through walls",false,""));
+    private final SliderSetting range  = addSetting(new SliderSetting("Range","Attack range",3.5,1.0,6.0,0.1));
+    private final SliderSetting cps    = addSetting(new SliderSetting("CPS","Clicks per second",10,1,20,1));
+    private final ModeSetting   target = addSetting(new ModeSetting("Target","Who to attack","Players","Players","Mobs","All"));
+    private final BoolSetting   rotate = addSetting(new BoolSetting("Rotate","Rotate to target",true));
+    private final BoolSetting   walls  = addSetting(new BoolSetting("Through Walls","Attack through walls",false));
 
     private long lastAttack = 0;
 
@@ -41,16 +38,14 @@ public class KillAura extends Module {
         EntityLivingBase best = findTarget();
         if (best == null) return;
 
-        if (!throughWalls.getValue()) {
-            MovingObjectPosition ray = mc.theWorld.rayTraceBlocks(
-                    mc.thePlayer.getPositionEyes(1f),
-                    best.getPositionEyes(1f));
+        if (!walls.getValue()) {
+            Vec3 eyes = mc.thePlayer.getPositionEyes(1f);
+            Vec3 targetEyes = best.getPositionEyes(1f);
+            MovingObjectPosition ray = mc.theWorld.rayTraceBlocks(eyes, targetEyes);
             if (ray != null) return;
         }
 
-        if (rotate.getValue()) {
-            rotateToward(best);
-        }
+        if (rotate.getValue()) rotateToward(best);
 
         mc.thePlayer.swingItem();
         mc.thePlayer.attackTargetEntityWithCurrentItem(best);
@@ -59,15 +54,22 @@ public class KillAura extends Module {
 
     private EntityLivingBase findTarget() {
         double r = range.getValue();
-        List<Entity> entities = mc.theWorld.loadedEntityList;
-        return entities.stream()
-                .filter(e -> e instanceof EntityLivingBase)
-                .filter(e -> e != mc.thePlayer)
-                .filter(e -> matchesTarget(e))
-                .filter(e -> mc.thePlayer.getDistanceToEntity(e) <= r)
-                .map(e -> (EntityLivingBase) e)
-                .min(Comparator.comparingDouble(e -> mc.thePlayer.getDistanceToEntity(e)))
-                .orElse(null);
+        EntityLivingBase closest = null;
+        double closestDist = Double.MAX_VALUE;
+
+        for (Entity e : new ArrayList<Entity>(mc.theWorld.loadedEntityList)) {
+            if (!(e instanceof EntityLivingBase)) continue;
+            if (e == mc.thePlayer) continue;
+            if (!matchesTarget(e)) continue;
+            EntityLivingBase living = (EntityLivingBase) e;
+            if (living.isDead || living.getHealth() <= 0) continue;
+            double dist = mc.thePlayer.getDistanceToEntity(e);
+            if (dist <= r && dist < closestDist) {
+                closest = living;
+                closestDist = dist;
+            }
+        }
+        return closest;
     }
 
     private boolean matchesTarget(Entity e) {
@@ -81,11 +83,10 @@ public class KillAura extends Module {
     private void rotateToward(EntityLivingBase entity) {
         double dx = entity.posX - mc.thePlayer.posX;
         double dz = entity.posZ - mc.thePlayer.posZ;
-        double dy = (entity.posY + entity.getEyeHeight()) - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
+        double dy = (entity.posY + entity.getEyeHeight())
+                  - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
         double dist = Math.sqrt(dx * dx + dz * dz);
-        float yaw   = (float)(Math.toDegrees(Math.atan2(dz, dx)) - 90);
-        float pitch = (float)(-Math.toDegrees(Math.atan2(dy, dist)));
-        mc.thePlayer.rotationYaw   = yaw;
-        mc.thePlayer.rotationPitch = pitch;
+        mc.thePlayer.rotationYaw   = (float)(Math.toDegrees(Math.atan2(dz, dx)) - 90);
+        mc.thePlayer.rotationPitch = (float)(-Math.toDegrees(Math.atan2(dy, dist)));
     }
 }

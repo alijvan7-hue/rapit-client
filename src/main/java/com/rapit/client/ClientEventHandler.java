@@ -1,11 +1,11 @@
 package com.rapit.client;
 
-import com.rapit.client.command.CommandManager;
 import com.rapit.client.event.events.*;
 import com.rapit.client.gui.clickgui.ClickGUI;
 import com.rapit.client.gui.hud.HUDEditor;
 import com.rapit.client.gui.mainmenu.RapitMainMenu;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -13,17 +13,15 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
-import net.minecraft.client.gui.GuiMainMenu;
 
 /**
- * Global Forge event bridge.
- * Translates Forge events into Rapit's internal bus + handles global keys.
+ * Global Forge event bridge for Rapit Client.
  */
 public class ClientEventHandler {
 
     private final Minecraft mc = Minecraft.getMinecraft();
 
-    // ── Main Menu Replacement ─────────────────────────────────────────────────
+    // ── Main Menu ─────────────────────────────────────────────────────────────
 
     @SubscribeEvent
     public void onGuiOpen(GuiOpenEvent event) {
@@ -48,7 +46,6 @@ public class ClientEventHandler {
         int key = Keyboard.getEventKey();
         if (!Keyboard.getEventKeyState()) return;
 
-        // RSHIFT → ClickGUI
         if (key == Keyboard.KEY_RSHIFT) {
             if (mc.currentScreen instanceof ClickGUI) {
                 mc.displayGuiScreen(null);
@@ -58,7 +55,6 @@ public class ClientEventHandler {
             return;
         }
 
-        // RCONTROL → HUD Editor
         if (key == Keyboard.KEY_RCONTROL) {
             if (mc.currentScreen instanceof HUDEditor) {
                 mc.displayGuiScreen(null);
@@ -68,7 +64,6 @@ public class ClientEventHandler {
             return;
         }
 
-        // Module keybinds
         RapitClient.getInstance().getModuleManager().onKey(key);
     }
 
@@ -81,7 +76,7 @@ public class ClientEventHandler {
         }
     }
 
-    // ── HUD Rendering ─────────────────────────────────────────────────────────
+    // ── HUD ───────────────────────────────────────────────────────────────────
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
@@ -91,7 +86,7 @@ public class ClientEventHandler {
         RapitClient.getInstance().getEventBus().post(new RenderHUDEvent(event.partialTicks));
     }
 
-    // ── World Rendering ───────────────────────────────────────────────────────
+    // ── World Render ──────────────────────────────────────────────────────────
 
     @SubscribeEvent
     public void onRenderWorld(RenderWorldLastEvent event) {

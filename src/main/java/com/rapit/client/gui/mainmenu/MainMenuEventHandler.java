@@ -5,10 +5,7 @@ import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
- * Intercepts the vanilla GuiMainMenu open event and replaces it
- * with our custom RapitMainMenu.
- *
- * Register via: MinecraftForge.EVENT_BUS.register(new MainMenuEventHandler());
+ * Intercepts vanilla GuiMainMenu and replaces with RapitMainMenu.
  */
 public class MainMenuEventHandler {
 

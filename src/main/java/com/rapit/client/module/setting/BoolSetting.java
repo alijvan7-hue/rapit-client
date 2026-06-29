@@ -6,11 +6,6 @@ public class BoolSetting extends Setting<Boolean> {
         super(name, description, defaultValue);
     }
 
-    // Convenience constructor used in some modules (ignores extra arg)
-    public BoolSetting(String name, String description, boolean defaultValue, String ignored) {
-        this(name, description, defaultValue);
-    }
-
     public void toggle() { value = !value; }
 
     @Override public String serialise()           { return value.toString(); }
